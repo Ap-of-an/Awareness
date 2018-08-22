@@ -12,7 +12,8 @@ const LT = 1600; //время жизни, за которое снежинка �
 class Spark {
   constructor() {
     this.x = getRand(10, canvas.offsetWidth * 0.8) + 0.5;
-    this.y = getRand(0, 0) + 0.5;
+    this.y = 0;
+    this.y_0 = getRand(1, 80) + 0.5;
     this.rot_deg = getRand(-40, 40);
     this.length = getRand(7, 19);
     let a = getX1Y1(this.length, this.rot_deg, this.x, this.y);
@@ -31,7 +32,7 @@ class Spark {
     this.vy = 2*(canvas.height/LT) - 0; // подразумевается vy пикселей в 1единицу времени ( 10 милисекунд)
     this.ay = (0 - this.vy) / LT;
     
-    console.log(canvas.off, LT, canvas.width/LT, 2*(canvas.width/LT));   
+   // console.log(canvas.off, LT, canvas.width/LT, 2*(canvas.width/LT));   
   }
   render() {
     context.strokeStyle = this.color;
@@ -40,7 +41,7 @@ class Spark {
     context.stroke();
 
     //this.x += this.vx;
-    this.y = this.vy * time + this.ay / 2 * time ** 2;
+    this.y = this.y_0 + this.vy * time + this.ay / 2 * time ** 2;
   }
 }
 const N = 25;
@@ -59,14 +60,10 @@ function load_canvas() {
       let id = setInterval(function () {
         time++;
         draw_Canvas();
-         if (time >= LT) {
-           clearInterval(id);
-           time = 0;
-         }
       }, interval);
-      // setInterval(function() {
-      //   time = 0;
-      // }, LT*10);
+      setInterval(function() {
+        time = 0;
+      }, LT*10);
     })()
   } else {
     console.log("Технология Canvas не поддерживается вашим браузером");
@@ -81,7 +78,7 @@ function draw_Canvas() {
   for (const item of arr_sparks) {
     item.render();
   }
-  console.log(time, arr_sparks[1].y);
+  //console.log(time, arr_sparks[1].y);
   // window.requestAnimationFrame(draw_Canvas);
   // document.querySelector("#in").innerText = i++;
 }
