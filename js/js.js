@@ -8,14 +8,14 @@ context.lineWidth = 0.1;
 context.lineCap = 'round';
 context.lineJoin = 'round';
 let time = 0;
-const LT = 1600; //время жизни, за которое снежинка проходит путь от самого начала до конца
+const LT = 1000; //время жизни, за которое снежинка проходит путь от самого начала до конца
 class Spark {
   constructor() {
-    this.x = getRand(10, canvas.offsetWidth * 0.8) + 0.5;
+    this.x = getRand(canvas.offsetWidth * 0.2, canvas.offsetWidth * 0.8);
     this.y = 0;
-    this.y_0 = getRand(1, 80) + 0.5;
+    this.y_0 = getRand(-1, -1);
     this.rot_deg = getRand(-40, 40);
-    this.length = getRand(7, 19);
+    this.length = getRand(7, 11);
     let a = getX1Y1(this.length, this.rot_deg, this.x, this.y);
     this.deltaX = a.x1;
     this.deltaY = a.y1;
@@ -31,17 +31,17 @@ class Spark {
     this.vx = 0;
     this.vy = 2*(canvas.height/LT) - 0; // подразумевается vy пикселей в 1единицу времени ( 10 милисекунд)
     this.ay = (0 - this.vy) / LT;
-    
-   // console.log(canvas.off, LT, canvas.width/LT, 2*(canvas.width/LT));   
-  }
+    this.time = 0;
+    }
   render() {
+    this.time += 1;
     context.strokeStyle = this.color;
     context.moveTo(this.x, this.y);
     context.lineTo(this.x1(), this.y1());
+    
     context.stroke();
-
     //this.x += this.vx;
-    this.y = this.y_0 + this.vy * time + this.ay / 2 * time ** 2;
+    this.y = this.y_0 + this.vy * this.time + this.ay / 2 * this.time ** 2;
   }
 }
 const N = 25;
@@ -63,6 +63,9 @@ function load_canvas() {
       }, interval);
       setInterval(function() {
         time = 0;
+        arr_sparks.forEach(el => {
+          el.time = 0;
+        });
       }, LT*10);
     })()
   } else {
@@ -70,17 +73,18 @@ function load_canvas() {
     document.querySelector("body").style.backgroundColor = "red";
   }
 }
-let i = 0;
+
+setInterval(() => {
+  arr_sparks.push(new Spark());  
+}, 5000)
 
 function draw_Canvas() {
   context.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-  context.beginPath();  
+  context.beginPath();
   for (const item of arr_sparks) {
     item.render();
   }
-  //console.log(time, arr_sparks[1].y);
   // window.requestAnimationFrame(draw_Canvas);
-  // document.querySelector("#in").innerText = i++;
 }
 
 function getX1Y1(length, anlge, x, y) {
