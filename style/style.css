@@ -31,7 +31,7 @@ body {
 
 .circle {
   border-radius: 50%;
-  transition: height 500ms;
+  transition: top 1s, left 1s;
 }
 .main-circle {
   height: calc(100% - 150px);
@@ -43,32 +43,11 @@ body {
   height: 20%;
   top: 50%;
   left: 50%;
-  transition: top 1s, left 1s;
+  
   transform: translate(-50%);
   border: 1px solid #4f79dd;
 }
 
-.main-circle > div:nth-child(1) {
-
-}
-.main-circle > div:nth-child(2) {
-  
-}
-.main-circle > div:nth-child(3) {
-  
-}
-.main-circle > div:nth-child(4) {
-  
-}
-.main-circle > div:nth-child(5) {
-  
-}
-.main-circle > div:nth-child(6) {
-  
-}
-.main-circle > div:nth-child(7) {
-  
-}
-.main-circle > div:nth-child(8) {
-  
+.d-n {
+  display: none;
 }

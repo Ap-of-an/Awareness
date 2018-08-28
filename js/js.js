@@ -167,3 +167,25 @@ function setPosChildrenCircles(parent) {
     childres[i].style.transform = "none";
   }
 }
+
+class Circle {
+  constructor() {
+
+  }
+}
+
+class MainCircle {
+  /**
+   * 
+   * @param {HTMLElement} main Главная окружность
+   */
+  constructor(main) {
+    let countOfChildren = main.childElementCount;
+    for (let i = 0; i < countOfChildren; i++) {
+      this[i] = new Circle();
+    }
+  }
+}
+
+let app = new MainCircle(document.getElementById("main_circle"));
+console.log(app);
