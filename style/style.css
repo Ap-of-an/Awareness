@@ -18,12 +18,8 @@ body {
   width: 100%;
   height: 100%;
 
-<<<<<<< HEAD
   background-image: url(../img/fon1.jpg);
   /* background-image: linear-gradient(to right, #ccc, #ccc, #ccc, #ccc, #ccc); */
-=======
-  background-image: linear-gradient(to bottom, rgb(70, 59, 238), rgb(91, 122, 224), rgba(40, 21, 122, 0.74));
->>>>>>> 026ec81fc7ee00457de8f4e462bac73a37edf326
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
