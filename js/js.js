@@ -1,4 +1,3 @@
-
 class Spark {
   constructor() {
     this.x = getRand(canvas.width*0.1, canvas.width*0.83);
@@ -12,6 +11,9 @@ class Spark {
     this.vy = getRand(2, 4);
     this.vx = 1;
     this.lw = 0.7;
+    this.temp = canvas.width*0.5;
+    this.temp1 = this.temp - this.x;
+    this.flag_middle = true;
   }
 
   create() {
@@ -62,9 +64,13 @@ class Sparks {
     
     this.array.forEach(el => {
       if(el.y > canvas.height*0.5 ) {
-        // let temp = canvas.width*0.5;
-        // let temp1 = Math.abs(temp - el.x);
-        // el.vx = temp1 / 100;
+        if(el.flag_middle) {
+          el.temp = canvas.width*0.5;
+          el.temp1 = el.temp - el.x;
+          el.v_angle = el.v_angle >= 0 ? el.v_angle : el.v_angle *= -1;
+          el.vx = el.temp1 / (canvas.height*0.5 / el.vy);
+          el.flag_middle = false;
+        }
         if(el.lw >= 0.01) {
           el.lw -= 0.006;
         }
@@ -72,6 +78,8 @@ class Sparks {
           el.y = -10;
           el.x = getRand(canvas.width*0.1, canvas.width*0.83);  
           el.lw = 0.7;
+          el.vx = 1;
+          el.flag_middle = true;
         }
       }
       el.create();      
@@ -111,6 +119,7 @@ context.strokeStyle='#fff';
 
 let bg_anim = new Sparks(1);
 const MAX_SPARKS = 200;
+let allCircles = document.getElementsByClassName("circle");
 document.body.onload = function() {
   setInterval(()=> {
     bg_anim.render();
@@ -121,4 +130,40 @@ document.body.onload = function() {
       }
     }
   }, 50);
+  for (const item of allCircles) {
+    item.style.width = item.offsetHeight + "px";
+  }  
+  setPosChildrenCircles(document.getElementById("main_circle"));
+}
+
+function offsetX_circle(a) {
+  let r = a.offsetHeight/2;
+  return r + Math.cos(Math.PI / 4) * r;
+}
+function offsetY_circle(a) {
+  let r = a.offsetHeight/2;
+  return Math.sin(Math.PI / 4) * r;
+}
+
+function indexInParent(el) {
+  let i;
+  for (i = 0; i < el.offsetParent.children.length; i++) {
+    if(el == el.offsetParent.children[i]) {
+      break;
+    }
+  }
+  return i;
+}
+/**
+ * 
+ * @param {HTMLElement} parent - родительский элемент, внутри которого круги
+ */
+function setPosChildrenCircles(parent) {
+  let childres = parent.children;
+  let R = parseInt(parent.style.width) / 2;
+  for(let i = 0; i < childres.length; i++) {
+    childres[i].style.left = (R + Math.cos(Math.PI/4 * i) * R) - childres[i].offsetHeight/2 + "px";
+    childres[i].style.top = (R - Math.sin(Math.PI/4 * i) * R) - childres[i].offsetHeight/2 + "px";
+    childres[i].style.transform = "none";
+  }
 }
