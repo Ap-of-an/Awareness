@@ -31,7 +31,8 @@ body {
 
 .circle {
   border-radius: 50%;
-  transition: top 1s, left 1s;
+  transition: top 30s, left 30s, transform 20s;
+  transition-timing-function: ease-out;
 }
 .main-circle {
   height: calc(100% - 150px);
@@ -43,9 +44,9 @@ body {
   height: 20%;
   top: 50%;
   left: 50%;
-  
-  transform: translate(-50%);
+  transform: translate(-50%, -50%);
   border: 1px solid #4f79dd;
+  background-color: #eee;
 }
 
 .d-n {
