@@ -89,6 +89,18 @@ class Sparks {
     });
     this.movingAnglRand();
   }
+
+  start() {
+    setInterval(() => {
+      this.render();
+      if (this.array.length < MAX_SPARKS) {
+        let n_rand = getRand(0, 1);
+        for (let i = 0; i < n_rand; i++) {
+          this.array.push(new Spark());
+        }
+      }
+    }, 50);
+  }
 }
 
 function get_dx_dy(length, anlge, x, y) {
@@ -116,6 +128,177 @@ function inRad(num) {
   return num * RAD_;
 }
 
+function move_forward(el) {
+  el.style.left = Math.round(el.x1) + "px";
+  el.style.top = Math.round(el.y1) + "px";
+}
+
+function move_backward(el) {
+  el.style.left = Math.round(el.x) + "px";
+  el.style.top = Math.round(el.y) + "px";
+}
+class ModelCircle {
+  /**
+   * @param {HTMLElement} main главный круг
+   */
+  constructor(main) {
+    let temp = main.offsetHeight / 2;
+    this.x_center = temp;
+    this.y_center = temp;
+    this.radius = temp;
+    this.main = main;
+    this.sizeCircle = 110;
+    this.initFirstChilds();
+    for (const item of main.children) {
+      this.initAllChildrenOfFirstChilds(item);
+    }
+  }
+  /**
+   * инициализания первоначальных кругов
+   */
+  initFirstChilds() {
+    let children = this.main.children;
+    let r = this.main.childElementCount ? children[0].offsetHeight / 2 : 0;
+    let angleChange = 360 / children.length;
+    for (let i = 0, j = 0; i < children.length; i++, j += angleChange) {
+      /* располагаем первые круги по центру основного круга */
+      children[i].x = this.radius - r;
+      children[i].y = this.radius - r;
+      move_backward(children[i]); // помещаем круги в центр главного круга
+      let temp = this.posXY(j);
+      children[i].x1 = temp[1];
+      children[i].y1 = temp[2];
+      children[i].angle = j;
+    }
+  }
+  /**
+   * инициализания координат всех вложенных кругов
+   */
+  initAllChildrenOfFirstChilds(circle) {
+    let numberOfChild = circle.childElementCount;
+    let delta_angle = Math.floor(360 / (numberOfChild + 1));
+    let angle = 0;
+    for (let i = 0; i < numberOfChild; i++) {
+      let child = circle.children[i];
+      angle = circle.angle + delta_angle * (i + 1);
+      angle = angle > 360 ? angle - 360 : angle;
+      let temp = this.posXY(angle);
+      temp[1] -= circle.x1;
+      temp[2] -= circle.y1;
+      this.setParametrs(0, 0, temp[1], temp[2], angle, child);
+
+      this.initAllChildrenOfFirstChilds(child);
+    }
+  }
+  setParametrs(x, y, x1, y1, angle, obj) {
+    obj.x = x;
+    obj.y = y;
+    obj.x1 = x1;
+    obj.y1 = y1;
+    obj.angle = angle;
+  }
+  /**
+   * @param {number} anlge Угол в градусах, показывающий место для расположение окружности
+   */
+  circlePosXY(anlge) {
+    return {
+      'x': Math.cos(inRad(anlge)) * this.radius,
+      'y': Math.sin(inRad(anlge)) * this.radius
+    }
+  }
+  posXY(anlge) {
+    let temp = this.circlePosXY(anlge);
+    let xR = temp.x,
+      yR = temp.y;
+    let x_lt = Math.round(this.x_center + xR) - this.sizeCircle / 2;
+    let y_lt = Math.round(this.y_center - yR) - this.sizeCircle / 2;
+    return {
+      1: x_lt,
+      2: y_lt
+    };
+  }
+  start() {
+    let i = 0;
+    let temp = setInterval(() => {
+      this.main.children[i].classList.add("show");
+      move_forward(this.main.children[i++]);
+      if (i == this.main.childElementCount)
+        clearInterval(temp);
+    }, 100);
+  }
+  addStartButton() {
+    let st_btn = document.createElement("div");
+    st_btn.classList.add("pulsation");
+    this.main.appendChild(st_btn);
+
+    let start1 = () => {
+      bg_anim.start();
+      this.main.classList.add("grow");
+      st_btn.removeEventListener("click", start1);
+
+      setTimeout(() => {
+        this.main.removeChild(st_btn);
+      }, 2800); // 1000 + 8*100
+
+      setTimeout(() => {
+        st_btn.classList.add("lessening");
+        this.start();
+      }, 1000);
+    }
+    st_btn.addEventListener("click", start1);
+  }
+  /**
+   * 
+   * @param {HTMLElement} circle 
+   */
+  addEventClicks() {
+    let temp = document.querySelectorAll(".circle");
+    for (const item of temp) {
+      item.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if(!this.childElementCount) { 
+          console.log(this);
+          return;
+        }        
+        if (this.classList.contains("active")) { //если круг уже выбран, возвращаемся на уровень выше
+          if(this.parentElement.classList.contains("opac")) {
+            this.parentElement.classList.remove("opac");
+            this.parentElement.classList.add("show");
+          }
+          this.classList.remove("active");
+          for (const item of this.children) {
+            item.classList.remove("show");
+            move_backward(item);
+          }
+          for (const item of this.parentElement.children) {
+            if (item != this) {
+              item.classList.add("show");
+            }
+          }
+        }
+        else { // если нажимают на круг
+          if(this.parentElement.classList.contains("active")) {
+            this.parentElement.classList.remove("show");
+            setTimeout(()=>{this.parentElement.classList.add("opac");}, 1000);
+          }
+          this.classList.add("active");
+          for (const item of this.parentElement.children) {
+            if (item != this) {
+              item.classList.remove("show");
+            }
+          }
+          for (const item of this.children) {
+            item.classList.add("show");
+            move_forward(item);
+          }
+        }
+      }, false);
+    }
+  }
+}
+
+
+
 let canvas = document.querySelector("canvas");
 let context = canvas.getContext("2d");
 canvas.setAttribute("width", canvas.parentElement.offsetWidth);
@@ -126,88 +309,12 @@ let bg_anim = new Sparks(1);
 const MAX_SPARKS = 200;
 
 document.body.onload = function () {
-  setInterval(() => {
-    bg_anim.render();
-    if (bg_anim.array.length < MAX_SPARKS) {
-      let n_rand = getRand(0, 1);
-      for (let i = 0; i < n_rand; i++) {
-        bg_anim.array.push(new Spark());
-      }
-    }
-  }, 50);
+
+
+  let main_c = document.querySelector("#main_circle");
+  let a = new ModelCircle(main_c);
+  // console.log(main_c.children[0].firstChild.textContent.trim());
+
+  a.addStartButton();
+  a.addEventClicks();
 }
-
-function offsetX_circle(a) {
-  let r = a.offsetHeight / 2;
-  return r + Math.cos(Math.PI / 4) * r;
-}
-
-function offsetY_circle(a) {
-  let r = a.offsetHeight / 2;
-  return Math.sin(Math.PI / 4) * r;
-}
-
-function indexInParent(el) {
-  let i;
-  for (i = 0; i < el.offsetParent.children.length; i++) {
-    if (el == el.offsetParent.children[i]) {
-      break;
-    }
-  }
-  return i;
-}
-
-console.log(undefined || 0);
-
-class Circle {
-  /**
-   * 
-   * @param {HTMLElement} circle 
-   */
-  constructor(circle) {
-    this.x = parseInt(circle.style.left) || 0;
-  }
-}
-
-class MainCircle {
-  /**
-   * 
-   * @param {HTMLElement} main Главная окружность
-   */
-  constructor(main) {
-    this.main = main;
-    let allCircles = document.getElementsByClassName("circle");
-    for (const item of allCircles) {
-      item.style.width = item.offsetHeight + "px";
-    }
-    this.setPosChildrenCircles();
-    let countOfChildren = main.childElementCount;
-    for (let i = 0; i < countOfChildren; i++) {
-      this[i] = new Circle(main.children[i]);
-    }
-  }
-
-  /**
-   * 
-   * @param {HTMLElement} parent - родительский элемент, внутри которого круги
-   */
-  setPosChildrenCircles() {
-    let childres = this.main.children;
-    let R = parseInt(this.main.style.width) / 2;
-    for (let i = 0; i < childres.length; i++) {
-      childres[i].style.left = (R + Math.cos(Math.PI / 4 * i) * R) - childres[i].offsetHeight / 2 + "px";
-      childres[i].style.top = (R - Math.sin(Math.PI / 4 * i) * R) - childres[i].offsetHeight / 2 + "px";
-      childres[i].style.transform = "none";
-    }
-  }
-}
-
-let app = new MainCircle(document.getElementById("main_circle"));
-console.log(app);
-
-runApp() {
-  setCirclesPos();
-
-}
-
-
