@@ -1,3 +1,4 @@
+const RAD_ = Math.PI / 180;
 class Spark {
   constructor() {
     this.x = getRand(canvas.width * 0.1, canvas.width * 0.83);
@@ -114,16 +115,12 @@ function get_dx_dy(length, anlge, x, y) {
     dy: dy
   };
 }
-
 function getColor() {
   return colors_spark[getRand(0, colors_spark.length - 1)];
 }
-
 function getRand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const RAD_ = Math.PI / 180;
-
 function inRad(num) {
   return num * RAD_;
 }
@@ -137,167 +134,287 @@ function move_backward(el) {
   el.style.left = Math.round(el.x) + "px";
   el.style.top = Math.round(el.y) + "px";
 }
-class ModelCircle {
-  /**
-   * @param {HTMLElement} main главный круг
-   */
-  constructor(main) {
-    let temp = main.offsetHeight / 2;
-    this.x_center = temp;
-    this.y_center = temp;
-    this.radius = temp;
-    this.main = main;
-    this.sizeCircle = 110;
-    this.initFirstChilds();
-    for (const item of main.children) {
-      this.initAllChildrenOfFirstChilds(item);
-    }
-  }
-  /**
-   * инициализания первоначальных кругов
-   */
-  initFirstChilds() {
-    let children = this.main.children;
-    let r = this.main.childElementCount ? children[0].offsetHeight / 2 : 0;
-    let angleChange = 360 / children.length;
-    for (let i = 0, j = 0; i < children.length; i++, j += angleChange) {
-      /* располагаем первые круги по центру основного круга */
-      children[i].x = this.radius - r;
-      children[i].y = this.radius - r;
-      move_backward(children[i]); // помещаем круги в центр главного круга
-      let temp = this.posXY(j);
-      children[i].x1 = temp[1];
-      children[i].y1 = temp[2];
-      children[i].angle = j;
-    }
-  }
-  /**
-   * инициализания координат всех вложенных кругов
-   */
-  initAllChildrenOfFirstChilds(circle) {
-    let numberOfChild = circle.childElementCount;
-    let delta_angle = Math.floor(360 / (numberOfChild + 1));
-    let angle = 0;
-    for (let i = 0; i < numberOfChild; i++) {
-      let child = circle.children[i];
-      angle = circle.angle + delta_angle * (i + 1);
-      angle = angle > 360 ? angle - 360 : angle;
-      let temp = this.posXY(angle);
-      temp[1] -= circle.x1;
-      temp[2] -= circle.y1;
-      this.setParametrs(0, 0, temp[1], temp[2], angle, child);
 
-      this.initAllChildrenOfFirstChilds(child);
-    }
-  }
-  setParametrs(x, y, x1, y1, angle, obj) {
-    obj.x = x;
-    obj.y = y;
-    obj.x1 = x1;
-    obj.y1 = y1;
-    obj.angle = angle;
+Array.prototype.lastEl = function () {
+  return this[this.length - 1];
+}
+
+class ObjectCircleModel {
+  /**
+   * Объект 
+   * @param {HTMLElement} mainHTMLcircle 
+   */
+  constructor(mainHTMLcircle) {
+    this.tree = new Crl([], undefined, mainHTMLcircle); // иннициализируем корневой псевдо-круг
+    this.main = mainHTMLcircle;
+    this.str_tag = ["h2", "h3", "h4", "h5", "h6"];
+    let allitems = this.main.querySelectorAll(this.str_tag.join(","));
+    this.parseToObj(allitems); // создаём объект всех кругов, заполняя свойство tree
+    this.setPositions();
+    this.addEventForButtonPulsation();
+    this.addEventsForAllCircles();
   }
   /**
-   * @param {number} anlge Угол в градусах, показывающий место для расположение окружности
+   * @param {HTMLCollection} array 
    */
-  circlePosXY(anlge) {
-    return {
-      'x': Math.cos(inRad(anlge)) * this.radius,
-      'y': Math.sin(inRad(anlge)) * this.radius
+  parseToObj(array) {
+    /* TN - Tag Name */
+    let previos_TN;
+    let curent_TN;
+    this.tree.children.push(new Crl([], this.tree, array[0]));
+    let curent;
+    let previos = this.tree.children[0];
+    for (let i = 0; i < array.length - 1; i++) {
+      curent_TN = array[i + 1].tagName;
+      previos_TN = array[i].tagName;
+      curent = new Crl([], "", array[i + 1]);
+      if (curent_TN > previos_TN) {
+        curent.parent = previos;
+        previos.children.push(curent);
+        previos = previos.children.lastEl();
+      } else if (curent_TN == previos_TN) {
+        curent.parent = previos.parent;
+        curent.parent.children.push(curent);
+        previos = curent.parent.children.lastEl();
+      } else { // (curent_TN < previos_TN) 
+        curent.parent = previos.parent.parent;
+        previos.parent.parent.children.push(curent);
+        previos = previos.parent.parent.children.lastEl();
+      }
     }
   }
-  posXY(anlge) {
-    let temp = this.circlePosXY(anlge);
-    let xR = temp.x,
-      yR = temp.y;
-    let x_lt = Math.round(this.x_center + xR) - this.sizeCircle / 2;
-    let y_lt = Math.round(this.y_center - yR) - this.sizeCircle / 2;
-    return {
-      1: x_lt,
-      2: y_lt
-    };
+  /**
+   * Проходит по всем элементам свойства-массива childrens объекта obj и применяет к ним функцию func
+   * @param {Crl} obj Объект
+   * @param {Function} func  функция, которая будет производится над всеми элементами массива childrens объекта obj
+   */
+  traversal(obj, func) {
+    let numOfChildren = obj.children.length;
+    for (let i = 0; i < numOfChildren; i++) {
+      let child = obj.children[i];
+      func(child);
+      this.traversal(child, func);
+    }
   }
-  start() {
-    let i = 0;
-    let temp = setInterval(() => {
-      this.main.children[i].classList.add("show");
-      move_forward(this.main.children[i++]);
-      if (i == this.main.childElementCount)
-        clearInterval(temp);
-    }, 100);
-  }
-  addStartButton() {
-    let st_btn = document.createElement("div");
-    st_btn.classList.add("pulsation");
-    this.main.appendChild(st_btn);
-
-    let start1 = () => {
+  addEventForButtonPulsation() {
+    let btn = document.querySelector("#btn_start");
+    let st = () => {
       bg_anim.start();
-      this.main.classList.add("grow");
-      st_btn.removeEventListener("click", start1);
-
+      this.main.classList.remove("small");
+      btn.removeEventListener("click", st);
       setTimeout(() => {
-        this.main.removeChild(st_btn);
-      }, 2800); // 1000 + 8*100
-
+        this.main.removeChild(btn);
+      }, 2800); 
       setTimeout(() => {
-        st_btn.classList.add("lessening");
-        this.start();
+        btn.classList.add("lessening");
+        this.initalAction();
       }, 1000);
     }
-    st_btn.addEventListener("click", start1);
+    btn.addEventListener("click", st);
   }
-  /**
-   * 
-   * @param {HTMLElement} circle 
-   */
-  addEventClicks() {
-    let temp = document.querySelectorAll(".circle");
-    for (const item of temp) {
-      item.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if(!this.childElementCount) { 
-          console.log(this);
-          return;
-        }        
-        if (this.classList.contains("active")) { //если круг уже выбран, возвращаемся на уровень выше
-          if(this.parentElement.classList.contains("opac")) {
-            this.parentElement.classList.remove("opac");
-            this.parentElement.classList.add("show");
-          }
-          this.classList.remove("active");
-          for (const item of this.children) {
-            item.classList.remove("show");
-            move_backward(item);
-          }
-          for (const item of this.parentElement.children) {
-            if (item != this) {
-              item.classList.add("show");
-            }
-          }
-        }
-        else { // если нажимают на круг
-          if(this.parentElement.classList.contains("active")) {
-            this.parentElement.classList.remove("show");
-            setTimeout(()=>{this.parentElement.classList.add("opac");}, 1000);
-          }
-          this.classList.add("active");
-          for (const item of this.parentElement.children) {
-            if (item != this) {
-              item.classList.remove("show");
-            }
-          }
-          for (const item of this.children) {
-            item.classList.add("show");
-            move_forward(item);
-          }
-        }
-      }, false);
-    }
+  initalAction() {
+    let i = 0;
+    let delayBeforeMoving = Math.round(800 / this.tree.children.length); // in seconds
+    let temp = setInterval(() => {
+      this.tree.children[i].htmlObj.classList.add("show");
+      this.tree.children[i++].move("forward");
+      if (i == this.tree.children.length)
+        clearInterval(temp);
+    }, delayBeforeMoving);
+  }
+  setPositions() {
+    this.traversal(this.tree, this.tree.setPosition);
+    this.traversal(this.tree, (circle) => {circle.move("backward")});
+  }
+  addEventsForAllCircles() {
+    this.traversal(this.tree, this.tree.addListener)
+  }
+  updateSizes() {
+    this.traversal(this.tree, this.tree.setPosition);
   }
 }
 
+class Crl {
+  /**
+   * @param {Array<Crl>} children
+   * @param {Crl} parent 
+   * @param {HTMLElement} htmlObj 
+   */
+  constructor(children, parent, htmlObj) {
+    this.htmlObj = htmlObj;
+    this.children = children;
+    this.parent = parent;
+    this.brothers;
+    this.text = htmlObj.innerHTML;
+    /**@type {Crl_position}*/
+    this.position;
+    this.animate = new Crl_Animate(this); 
+  }
+  /** Возвращает массив одноуровневых Crl-элементов */
+  getBrothers() {
+    return this.parent.children.filter(el => {
+      return el != this;
+    });
+  }
+  /**
+   * @param {Crl} circle 
+   */
+  setPosition(circle) {
+    circle.position = new Crl_position(circle);
+    console.log(circle.text, circle.position);
+  }
+  move(direction) {
+    if (direction == "forward") {
+      this.position.moveState = "forward";
+      this.htmlObj.style.left = Math.round(this.position.x1/(this.position.radiusMainCrl*2)*10000)/100 + "%";
+      this.htmlObj.style.top = Math.round(this.position.y1/(this.position.radiusMainCrl*2)*10000)/100 + "%";
+    } else if (direction == "backward") {
+      this.position.moveState = "backward";
+      this.htmlObj.style.left = Math.round(this.position.x/(this.position.radiusMainCrl*2)*10000)/100 + "%";
+      this.htmlObj.style.top = Math.round(this.position.y/(this.position.radiusMainCrl*2)*10000)/100+ "%";
+    }
+    else {
+      console.error("direction = " + direction + ". Неверное направление/");
+    }
+  }
+  moveToggle() {
+    if (this.position.moveState == "forward") {
+      this.move("backward");
+    } else if (this.position.moveState == "backward") {
+      this.move("forward");
+    }
+  }
+  /** @param {Crl} circle */
+  addListener(circle) {
+    circle.htmlObj.addEventListener("click", () => {
+      if (circle.children.length) {
+        // circle.animate.toggle();
+        circle.htmlObj.classList.toggle("active");
+        circle.parent.htmlObj.classList.toggle("show");
+        circle.getBrothers().forEach(el => {
+          el.htmlObj.classList.toggle("show");
+        });
+        circle.children.forEach(el => {
+          el.htmlObj.classList.toggle("show");
+          el.moveToggle();
+        });
+      } else {
+        // circle.putTextInCenter();
+      }
+    });
+  }
+  
+}
 
+class Crl_position {
+  /**
+   * Содержит в себе координаты начальных и конечных позиций элементов, а так же угол относительно большого круга
+   * @param {Crl} circle 
+   */
+  constructor(circle) {
+    this.radiusMainCrl = document.getElementById("main_circle").offsetWidth / 2;
+    this.calcPosition(circle);
+    this.moveState = "backward";
+  }
+  /**
+   * @param {Crl} circle 
+   */
+  calcPosition(circle) {
+    // устанавливаем позицию самых "старших" кругов
+    if(circle.parent.parent == undefined) {
+      this.calcFirstBornChildren(circle);
+    } //устанавливаем позицию оставшихся кругов
+    else {
+      this.calcRemainingChildren(circle);
+    }
+  }
+  /**
+   * @param {Crl} circle 
+   */
+  calcFirstBornChildren(circle) {
+      let r = Math.round(circle.htmlObj.offsetWidth / 2);
+      let R = this.radiusMainCrl;
+      console.log("Радиус большого круга: ", R, "\nРадиус маленького: ", r);
+      this.x = R - r;
+      this.y = R - r;
+      let angleChange = 360 / circle.parent.children.length;
+      let index = circle.parent.children.indexOf(circle);
+      this.angle = angleChange * index;
+      let temp = this.posXY(this.angle, R, r);
+      this.x1 = temp.x;
+      this.y1 = temp.y;
+  }
+  /**
+   * @param {Crl} circle 
+   */
+  calcRemainingChildren(circle) {
+    let r = Math.round(circle.htmlObj.offsetWidth / 2);
+    let R = this.radiusMainCrl;
+    this.x = circle.parent.position.x1;
+    this.y = circle.parent.position.y1;
+    let angleChange = 360 / (circle.parent.children.length + 1);
+    let index = circle.parent.children.indexOf(circle);
+    let ang = circle.parent.position.angle + angleChange * ++index;
+    this.angle = ang >= 360 ? ang - 360 : ang;
+    let temp = this.posXY(this.angle, R, r);
+    this.x1 = temp.x;
+    this.y1 = temp.y;
+  }
+  circlePosXY(anlge, R) {
+    return {
+      'x': Math.cos(inRad(anlge)) * R,
+      'y': Math.sin(inRad(anlge)) * R
+    }
+  }
+  posXY(anlge, R, r) {
+    let temp = this.circlePosXY(anlge, R);
+    let xR = temp.x, yR = temp.y;
+    let x_lt = Math.round(R + xR - r);
+    let y_lt = Math.round(R - yR - r);
+    return {'x': x_lt,'y': y_lt};
+  }
+}
+
+class Crl_Animate {
+  /**
+   * Отвечает за добавление классов элементам при нажатии на них
+   * @param {Crl} circle 
+   */
+  constructor(circle) {
+    this.circle = circle;
+    this.isShowChildren = false;
+  }
+  toggle() {
+    this.isShowChildren ? this.expand() : this.collapse();
+  }
+  expand() {
+    //hideSingleLvlEl();
+
+    //showChildren();
+  }
+  collapse() {
+    //hideChildren();
+    //showSingleLvlEl();
+  }
+  /**
+   * Скрыть элементы массива array
+   * @param {Array<Crl>} array 
+   */
+  hide(array) {
+    array.forEach(el => {
+      el.htmlObj.classList.toggle("show");
+    });
+  }
+  /**
+   * Отобразить элементы массива array
+   * @param {Array<Crl>} array 
+   */
+  show(array) {
+    array.forEach(el => {
+      el.htmlObj.classList.toggle("show");
+    });
+  }
+}
 
 let canvas = document.querySelector("canvas");
 let context = canvas.getContext("2d");
@@ -308,13 +425,22 @@ context.strokeStyle = '#fff';
 let bg_anim = new Sparks(1);
 const MAX_SPARKS = 200;
 
+
 document.body.onload = function () {
-
-
   let main_c = document.querySelector("#main_circle");
-  let a = new ModelCircle(main_c);
-  // console.log(main_c.children[0].firstChild.textContent.trim());
-
-  a.addStartButton();
-  a.addEventClicks();
+  let app = new ObjectCircleModel(main_c);
+  console.log(app);
+  // window.addEventListener("resize", function() {
+  //   app.updateSizes();
+  // });
+  document.body.addEventListener("click", function() {
+    console.log(app);
+  })
 }
+
+
+
+// function putTextInCenter() {
+//   main.clearCenter();
+//   forwardText();
+// }

@@ -9,7 +9,6 @@ body {
 
 .wrapper {
   max-width: 100%;
-  min-width: 630px;
   height: 100%;
   position: relative;
   display: flex;
@@ -26,22 +25,20 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url(../img/fon1.jpg);
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+  background: url(../img/fon1.jpg) center top / cover no-repeat;
 }
-.grow {
-  transform: scale(1, 1) !important;
-  background-color: rgba(0, 30, 80, 0.9);
-}
+
 .main-circle {
   border-radius: 50%;
   position: relative;
-  height: 500px;
-  width: 500px;
+  height: 80vmin;
+  width: 80vmin;
   transition: all 1s;
+  background-color: rgba(0, 30, 80, 0.9);
+}
+.main-circle.small {
   transform: scale(0.3, 0.3);
+  background-color: transparent;
 }
 .main-circle::before,
 .main-circle::after {
@@ -68,35 +65,35 @@ body {
 .pulsation {
   position: absolute;
   border-radius: 50%;
-  width: 110px;
-  height: 110px;
+  width: 220px;
+  height: 220px;
   top: 50%;
   left: 50%;
-  margin-top: -55px;
-  margin-left: -55px;
+  margin-top: -105px;
+  margin-left: -105px; 
   background-image: radial-gradient(farthest-side ellipse at top left, rgb(29, 39, 205), #002c65);
   box-shadow: 5px 10px 9px rgba(170, 200, 249, 0.37), -5px -10px 20px rgba(192, 155, 228, 0.4);
   border: none;
   transition: box-shadow 300ms, background-image 400ms;
 }
 .pulsation.lessening {
-  transform: scale(0, 0);
+  transform: scale(0, 0) !important;
   transition: transform 1800ms;
 }
-.pulsation:hover {
+/* .pulsation:hover {
   background-image: radial-gradient(farthest-side ellipse at top left, rgb(29, 39, 205), #002c65);
 }
 .pulsation:active {
   box-shadow: inset 5px 10px 7px rgba(68, 62, 218, 0.22), inset -5px -10px 14px rgba(29, 51, 136, 0.5);
-}
+} */
 .pulsation::after,
 .pulsation::before {
   content: "";
   display: block;
   position: absolute;
   animation: pulse 2s ease 1s infinite; 
-  width: 110px;
-  height: 110px;
+  width: 100%;
+  height: 100%;
   z-index: -1;
   border-radius: 50%;
 }
@@ -171,10 +168,11 @@ body {
 }
 
 .circle {
-  width: 110px;
-  height: 110px;
+  margin: 0;
+  width: 20%;
+  height: 20%;
   border-radius: 50%;
-  transition: top 1s, left 1s, opacity 600ms, visibility 1s;
+  transition: top 1s, left 1s, opacity 600ms, width 300ms, height 300ms, box-shadow 300ms, visibility 1s, z-index 1s;
   transition-timing-function: cubic-bezier(.40, .86, .48, 1);
   position: absolute;
   cursor: pointer;
@@ -184,25 +182,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 0;
-  left: 0;
   opacity: 0;
   z-index: -1;
-  visibility: hidden; 
+  visibility: hidden;
+  user-select: none;
 }
 
 .circle.show {
   opacity: 1;
-  z-index: 0;
+  z-index: 1;
   visibility: visible; 
-}
-.circle.opac {
-  opacity: 1 !important;
-  z-index: 0;
 }
 
 .circle.active {
-  width: 125px;
-  height: 125px;
+  width: 21%;
+  height: 21%;
   box-shadow: 0 0 17px 1px rgba(255,255,255, 0.4);
 }
