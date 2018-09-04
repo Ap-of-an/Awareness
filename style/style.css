@@ -35,6 +35,9 @@ body {
   width: 80vmin;
   transition: all 1s;
   background-color: rgba(0, 30, 80, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .main-circle.small {
   transform: scale(0.3, 0.3);
@@ -172,7 +175,7 @@ body {
   width: 20%;
   height: 20%;
   border-radius: 50%;
-  transition: top 1s, left 1s, opacity 600ms, width 300ms, height 300ms, box-shadow 300ms, visibility 1s, z-index 1s;
+  transition: top 1s, left 1s, opacity 600ms, width 300ms, height 300ms, box-shadow 300ms, visibility 1s;
   transition-timing-function: cubic-bezier(.40, .86, .48, 1);
   position: absolute;
   cursor: pointer;
@@ -198,4 +201,17 @@ body {
   width: 21%;
   height: 21%;
   box-shadow: 0 0 17px 1px rgba(255,255,255, 0.4);
+}
+
+
+.text {
+  width: 79%;
+  height: 79%;
+  border-radius: 50%;
+  border: 1px solid #000;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

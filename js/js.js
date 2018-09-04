@@ -125,16 +125,6 @@ function inRad(num) {
   return num * RAD_;
 }
 
-function move_forward(el) {
-  el.style.left = Math.round(el.x1) + "px";
-  el.style.top = Math.round(el.y1) + "px";
-}
-
-function move_backward(el) {
-  el.style.left = Math.round(el.x) + "px";
-  el.style.top = Math.round(el.y) + "px";
-}
-
 Array.prototype.lastEl = function () {
   return this[this.length - 1];
 }
@@ -300,6 +290,9 @@ class Crl {
         });
       } else {
         // circle.putTextInCenter();
+        let text = document.createElement("span");
+        text.innerHTML = circle.text;
+        
       }
     });
   }
