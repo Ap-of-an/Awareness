@@ -68,12 +68,12 @@ body {
 .pulsation {
   position: absolute;
   border-radius: 50%;
-  width: 220px;
-  height: 220px;
+  width: 120px;
+  height: 120px;
   top: 50%;
   left: 50%;
-  margin-top: -105px;
-  margin-left: -105px; 
+  margin-top: -60px;
+  margin-left: -60px; 
   background-image: radial-gradient(farthest-side ellipse at top left, rgb(29, 39, 205), #002c65);
   box-shadow: 5px 10px 9px rgba(170, 200, 249, 0.37), -5px -10px 20px rgba(192, 155, 228, 0.4);
   border: none;

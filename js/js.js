@@ -189,7 +189,9 @@ class ObjectCircleModel {
   addEventForButtonPulsation() {
     let btn = document.querySelector("#btn_start");
     let st = () => {
-      bg_anim.start();
+      if (typeof bg_anim != "undefined") {
+        bg_anim.start();
+      }     
       this.main.classList.remove("small");
       btn.removeEventListener("click", st);
       setTimeout(() => {
@@ -251,7 +253,6 @@ class Crl {
    */
   setPosition(circle) {
     circle.position = new Crl_position(circle);
-    console.log(circle.text, circle.position);
   }
   move(direction) {
     if (direction == "forward") {
@@ -327,7 +328,6 @@ class Crl_position {
   calcFirstBornChildren(circle) {
       let r = Math.round(circle.htmlObj.offsetWidth / 2);
       let R = this.radiusMainCrl;
-      console.log("Радиус большого круга: ", R, "\nРадиус маленького: ", r);
       this.x = R - r;
       this.y = R - r;
       let angleChange = 360 / circle.parent.children.length;
@@ -409,15 +409,24 @@ class Crl_Animate {
   }
 }
 
+var isMobile = {
+  Android:        function() { return navigator.userAgent.match(/Android/i) ? true : false; },
+  BlackBerry:     function() { return navigator.userAgent.match(/BlackBerry/i) ? true : false; },
+  iOS:            function() { return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false; },
+  Windows:        function() { return navigator.userAgent.match(/IEMobile/i) ? true : false; },
+  any:            function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());  }
+};
+
 let canvas = document.querySelector("canvas");
 let context = canvas.getContext("2d");
-canvas.setAttribute("width", canvas.parentElement.offsetWidth);
-canvas.setAttribute("height", canvas.parentElement.offsetHeight);
-context.strokeStyle = '#fff';
-
-let bg_anim = new Sparks(1);
+let bg_anim = undefined;
 const MAX_SPARKS = 200;
-
+if ( !isMobile.any() ) {  
+  canvas.setAttribute("width", canvas.parentElement.offsetWidth);
+  canvas.setAttribute("height", canvas.parentElement.offsetHeight);
+  context.strokeStyle = '#fff';  
+  bg_anim = new Sparks(1);
+}
 
 document.body.onload = function () {
   let main_c = document.querySelector("#main_circle");
@@ -426,9 +435,9 @@ document.body.onload = function () {
   // window.addEventListener("resize", function() {
   //   app.updateSizes();
   // });
-  document.body.addEventListener("click", function() {
-    console.log(app);
-  })
+  // document.body.addEventListener("click", function() {
+  //   console.log(app);
+  // })
 }
 
 
