@@ -115,12 +115,15 @@ function get_dx_dy(length, anlge, x, y) {
     dy: dy
   };
 }
+
 function getColor() {
   return colors_spark[getRand(0, colors_spark.length - 1)];
 }
+
 function getRand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 function inRad(num) {
   return num * RAD_;
 }
@@ -191,12 +194,12 @@ class ObjectCircleModel {
     let st = () => {
       if (typeof bg_anim != "undefined") {
         bg_anim.start();
-      }     
+      }
       this.main.classList.remove("small");
       btn.removeEventListener("click", st);
       setTimeout(() => {
         this.main.removeChild(btn);
-      }, 2800); 
+      }, 2800);
       setTimeout(() => {
         btn.classList.add("lessening");
         this.initalAction();
@@ -216,7 +219,9 @@ class ObjectCircleModel {
   }
   setPositions() {
     this.traversal(this.tree, this.tree.setPosition);
-    this.traversal(this.tree, (circle) => {circle.move("backward")});
+    this.traversal(this.tree, (circle) => {
+      circle.move("backward")
+    });
   }
   addEventsForAllCircles() {
     this.traversal(this.tree, this.tree.addListener)
@@ -240,7 +245,7 @@ class Crl {
     this.text = htmlObj.innerHTML;
     /**@type {Crl_position}*/
     this.position;
-    this.animate = new Crl_Animate(this); 
+    this.animate = new Crl_Animate(this);
   }
   /** Возвращает массив одноуровневых Crl-элементов */
   getBrothers() {
@@ -257,14 +262,13 @@ class Crl {
   move(direction) {
     if (direction == "forward") {
       this.position.moveState = "forward";
-      this.htmlObj.style.left = Math.round(this.position.x1/(this.position.radiusMainCrl*2)*10000)/100 + "%";
-      this.htmlObj.style.top = Math.round(this.position.y1/(this.position.radiusMainCrl*2)*10000)/100 + "%";
+      this.htmlObj.style.left = Math.round(this.position.x1 / (this.position.radiusMainCrl * 2) * 10000) / 100 + "%";
+      this.htmlObj.style.top = Math.round(this.position.y1 / (this.position.radiusMainCrl * 2) * 10000) / 100 + "%";
     } else if (direction == "backward") {
       this.position.moveState = "backward";
-      this.htmlObj.style.left = Math.round(this.position.x/(this.position.radiusMainCrl*2)*10000)/100 + "%";
-      this.htmlObj.style.top = Math.round(this.position.y/(this.position.radiusMainCrl*2)*10000)/100+ "%";
-    }
-    else {
+      this.htmlObj.style.left = Math.round(this.position.x / (this.position.radiusMainCrl * 2) * 10000) / 100 + "%";
+      this.htmlObj.style.top = Math.round(this.position.y / (this.position.radiusMainCrl * 2) * 10000) / 100 + "%";
+    } else {
       console.error("direction = " + direction + ". Неверное направление/");
     }
   }
@@ -291,13 +295,23 @@ class Crl {
         });
       } else {
         // circle.putTextInCenter();
+        /* создание анимации движения текста в центр круга из той кнопки, которая была нажата */
         let text = document.createElement("span");
-        text.innerHTML = circle.text;
-        
+        text.innerHTML = "sadasdasdasdas das das dd as das das dsa das dasd asd ";
+        text.classList.add("text-in-middle");
+        circle.htmlObj.parentNode.insertBefore(text, circle.htmlObj.nextSibling);
+        text.style.left = circle.position.x1 + circle.htmlObj.offsetHeight/2 + "px";
+        text.style.top = circle.position.y1 + circle.htmlObj.offsetHeight/2 + "px";    
+        setTimeout(function() {
+          text.classList.add("grow");
+        text.style.left = circle.position.radiusMainCrl + "px";
+        text.style.top = circle.position.radiusMainCrl + "px";
+
+        }, 20);
       }
     });
   }
-  
+
 }
 
 class Crl_position {
@@ -315,7 +329,7 @@ class Crl_position {
    */
   calcPosition(circle) {
     // устанавливаем позицию самых "старших" кругов
-    if(circle.parent.parent == undefined) {
+    if (circle.parent.parent == undefined) {
       this.calcFirstBornChildren(circle);
     } //устанавливаем позицию оставшихся кругов
     else {
@@ -326,16 +340,16 @@ class Crl_position {
    * @param {Crl} circle 
    */
   calcFirstBornChildren(circle) {
-      let r = Math.round(circle.htmlObj.offsetWidth / 2);
-      let R = this.radiusMainCrl;
-      this.x = R - r;
-      this.y = R - r;
-      let angleChange = 360 / circle.parent.children.length;
-      let index = circle.parent.children.indexOf(circle);
-      this.angle = angleChange * index;
-      let temp = this.posXY(this.angle, R, r);
-      this.x1 = temp.x;
-      this.y1 = temp.y;
+    let r = Math.round(circle.htmlObj.offsetWidth / 2);
+    let R = this.radiusMainCrl;
+    this.x = R - r;
+    this.y = R - r;
+    let angleChange = 360 / circle.parent.children.length;
+    let index = circle.parent.children.indexOf(circle);
+    this.angle = angleChange * index;
+    let temp = this.posXY(this.angle, R, r);
+    this.x1 = temp.x;
+    this.y1 = temp.y;
   }
   /**
    * @param {Crl} circle 
@@ -361,10 +375,14 @@ class Crl_position {
   }
   posXY(anlge, R, r) {
     let temp = this.circlePosXY(anlge, R);
-    let xR = temp.x, yR = temp.y;
+    let xR = temp.x,
+      yR = temp.y;
     let x_lt = Math.round(R + xR - r);
     let y_lt = Math.round(R - yR - r);
-    return {'x': x_lt,'y': y_lt};
+    return {
+      'x': x_lt,
+      'y': y_lt
+    };
   }
 }
 
@@ -410,21 +428,31 @@ class Crl_Animate {
 }
 
 var isMobile = {
-  Android:        function() { return navigator.userAgent.match(/Android/i) ? true : false; },
-  BlackBerry:     function() { return navigator.userAgent.match(/BlackBerry/i) ? true : false; },
-  iOS:            function() { return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false; },
-  Windows:        function() { return navigator.userAgent.match(/IEMobile/i) ? true : false; },
-  any:            function() { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());  }
+  Android: function () {
+    return navigator.userAgent.match(/Android/i) ? true : false;
+  },
+  BlackBerry: function () {
+    return navigator.userAgent.match(/BlackBerry/i) ? true : false;
+  },
+  iOS: function () {
+    return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+  },
+  Windows: function () {
+    return navigator.userAgent.match(/IEMobile/i) ? true : false;
+  },
+  any: function () {
+    return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+  }
 };
 
 let canvas = document.querySelector("canvas");
 let context = canvas.getContext("2d");
 let bg_anim = undefined;
 const MAX_SPARKS = 200;
-if ( !isMobile.any() ) {  
+if (!isMobile.any()) {
   canvas.setAttribute("width", canvas.parentElement.offsetWidth);
   canvas.setAttribute("height", canvas.parentElement.offsetHeight);
-  context.strokeStyle = '#fff';  
+  context.strokeStyle = '#fff';
   bg_anim = new Sparks(1);
 }
 

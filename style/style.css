@@ -78,6 +78,7 @@ body {
   box-shadow: 5px 10px 9px rgba(170, 200, 249, 0.37), -5px -10px 20px rgba(192, 155, 228, 0.4);
   border: none;
   transition: box-shadow 300ms, background-image 400ms;
+  z-index: 1;
 }
 .pulsation.lessening {
   transform: scale(0, 0) !important;
@@ -175,7 +176,7 @@ body {
   width: 20%;
   height: 20%;
   border-radius: 50%;
-  transition: top 1s, left 1s, opacity 600ms, width 300ms, height 300ms, box-shadow 300ms, visibility 1s;
+  transition: top 1s, left 1s, opacity 600ms, width 300ms, height 300ms, box-shadow 300ms, visibility 1s, z-index 1s;
   transition-timing-function: cubic-bezier(.40, .86, .48, 1);
   position: absolute;
   cursor: pointer;
@@ -186,7 +187,7 @@ body {
   justify-content: center;
   align-items: center;
   opacity: 0;
-  z-index: -1;
+  z-index: 0;
   visibility: hidden;
   user-select: none;
 }
@@ -214,4 +215,25 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 0;
+}
+
+.text-in-middle {
+  color: #fff;
+  position: absolute;
+  font-size: 15px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.3, .3);
+  background-color: transparent;
+  transition: all .5s;
+  z-index: 0;
+  visibility: hidden;
+  max-width: 100px;
+  transition-timing-function: ease-in-out;
+}
+.text-in-middle.grow {
+  transform: translate(-50%, -50%) scale(1, 1) !important;
+  visibility: visible;
+  opacity: 1;
+  z-index: 1;
 }
